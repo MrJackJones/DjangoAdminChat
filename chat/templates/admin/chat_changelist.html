@@ -1,0 +1,22 @@
+{% extends 'admin/change_list.html' %}
+{% load i18n admin_static admin_list %}
+
+{% block object-tools %}
+
+    <div>
+        <form action="./create" method="POST">
+            <label>
+                <select title="get_user" name="get_user">
+                <option value="">-</option>
+                    {% for user in users %}
+                        <option value="{{ user.id }}">{{ user }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            {% csrf_token %}
+                <input type="submit" value="Create chat">
+        </form>
+    </div>
+    <br />
+    {{ block.super }}
+{% endblock %}

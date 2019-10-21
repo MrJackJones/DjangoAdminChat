@@ -1,0 +1,15 @@
+from django.conf.urls import include
+from django.urls import path
+from .views import default, chat
+from django.contrib import admin
+
+urlpatterns = [
+    path('', default, name='default'),
+    path('api/v1/', include([
+        path('chat', chat, name='chat'),
+    ])),
+
+]
+
+admin.site.index_template = 'admin/index.html'
+admin.autodiscover()

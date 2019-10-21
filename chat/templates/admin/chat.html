@@ -1,0 +1,38 @@
+<div class="main-chat main-chat-{{ obj.pk }}" data-id="{{ obj.pk }}">
+    <div style="overflow-y: scroll; max-height:800px; width: 800px" id="chat" class="chat-{{ obj.pk }}">
+    {% for comment in obj.comment.all %}
+        {% if comment.user.is_superuser %}
+            <div class="container darker" >
+        {% else %}
+            <div class="container">
+        {% endif %}
+          <p>{{ comment.message | linebreaksbr }}</p>
+           <span class="time-right">{{ comment.created_at }}</span><br>
+           <span class="time-right">
+           {% if comment.user %}
+                {{ comment.user }}
+           {% else %}
+               Unknown
+           {% endif %}
+           {% if comment.is_read %}
+                 &#10003;
+           {% endif %}
+           </span>
+        </div>
+    {% endfor %}
+    </div>
+
+    <div class="comment-form">
+        <input type="hidden" name="comment_id" class="comment-id" value="{{ comment.pk }}">
+        <br/>
+        <br/>
+        <label>
+            <textarea name="message" class="message" placeholder="Input message..."></textarea>
+        </label>
+        <br/>
+        <br/>
+        <input type="button" class="add-comment" data-id="{{ comment.pk }}" value="Send">
+    </div>
+    <input type="button" class="refresh" data-id="{{ obj.pk }}" style="visibility: hidden" >
+</div>
+</div>
