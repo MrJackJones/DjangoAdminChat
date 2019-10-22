@@ -58,7 +58,10 @@ class ChatAdmin(admin.ModelAdmin):
             extra_context=extra_context,
         )
 
-        response.context_data['users'] = User.objects.filter(is_active=True)
+        try:
+            response.context_data['users'] = User.objects.filter(is_active=True)
+        except (AttributeError, KeyError):
+            return response
 
         return response
 
@@ -128,7 +131,7 @@ class ChatAdmin(admin.ModelAdmin):
             }, status=403)
 
         c = ChatActions()
-        c.add_message(chat, message)
+        c.add_message(chat, request.user, message)
 
         return JsonResponse({
             'status': True,

@@ -51,7 +51,7 @@ class ChatTestCase(TestCase):
         chat_uuid = c.create()
         get_chat = c.get_chat_by_uuid(chat_uuid)
         message = 'Hello world'
-        add_message = c.add_message(get_chat, message)
+        add_message = c.add_message(get_chat, get_chat.user, message)
         self.assertEqual(message, add_message.message)
 
     def test_is_read(self):
@@ -59,7 +59,7 @@ class ChatTestCase(TestCase):
         chat_uuid = c.create()
         get_chat = c.get_chat_by_uuid(chat_uuid)
         message = 'Hello world'
-        add_message = c.add_message(get_chat, message)
+        add_message = c.add_message(get_chat, get_chat.user, message)
         is_read = c.mark_is_read(get_chat)
         add_message.refresh_from_db()
         self.assertEqual(True, is_read)
@@ -70,14 +70,14 @@ class ChatTestCase(TestCase):
         chat_uuid = c.create()
         get_chat = c.get_chat_by_uuid(chat_uuid)
         message = 'Hello world'
-        c.add_message(get_chat, message)
+        c.add_message(get_chat, get_chat.user, message)
 
         get_comment_list = c.get_comment_list(get_chat)
         self.assertEqual(1, len(get_comment_list))
         self.assertEqual(1, get_comment_list[0]['id'])
         self.assertEqual(message, get_comment_list[0]['message'])
 
-        c.add_message(get_chat, message)
+        c.add_message(get_chat, get_chat.user, message)
         get_comment_list = c.get_comment_list(get_chat)
         self.assertEqual(2, len(get_comment_list))
         get_comment_list = c.get_comment_list(get_chat, 1)

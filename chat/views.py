@@ -44,7 +44,7 @@ def chat(request):
             }, status=403)
 
         if message:
-            comment = c.add_message(chat, message)
+            comment = c.add_message(chat, chat.user, message)
 
             if not comment:
                 return JsonResponse({

@@ -1,6 +1,6 @@
 from django.conf.urls import include
 from django.urls import path
-from .views import default, chat
+from .views import chat
 from django.contrib import admin
 
 urlpatterns = [

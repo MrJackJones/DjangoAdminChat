@@ -71,17 +71,18 @@ class ChatActions:
             logger.error(e)
             return
 
-    def add_message(self, chat: Chat, message: str = '') -> ChatMessage or None:
+    def add_message(self, chat: Chat, user: User, message: str = '') -> ChatMessage or None:
         """
         Add message
         :param chat: chat: Chat
+        :param user: user: User
         :param message: message: str or ''
         :return: ChatMessage or None
         """
         try:
             comment = ChatMessage(
                 chat=chat,
-                user=chat.user,
+                user=user,
                 message=message,
             )
             comment.save()
