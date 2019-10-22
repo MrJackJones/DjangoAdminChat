@@ -4,7 +4,6 @@ from .views import default, chat
 from django.contrib import admin
 
 urlpatterns = [
-    path('', default, name='default'),
     path('api/v1/', include([
         path('chat', chat, name='chat'),
     ])),

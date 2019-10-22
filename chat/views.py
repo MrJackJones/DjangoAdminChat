@@ -9,12 +9,6 @@ from .main import ChatActions
 logger = logging.getLogger('main')
 
 
-def default(request):
-    return JsonResponse({
-        'error': 'access_deny'
-    }, status=403)
-
-
 @csrf_exempt
 def chat(request):
     try:
