@@ -1,4 +1,6 @@
+from django.db.models import Q
 from django.contrib import admin
+from django.contrib.admin import SimpleListFilter
 from django.conf.urls import url
 from django.core.cache import cache
 from django.http import JsonResponse
@@ -11,9 +13,41 @@ from .main import ChatActions
 from .models import Chat
 
 
+class DisableChatsWithoutCommentsFilter(SimpleListFilter):
+    title = 'Don`t show chats without comments'
+    parameter_name = 'disable'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('disable', 'Don`t show'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(~Q(comment__chat=None))
+        return queryset
+
+
+class ShowChatsWithNewUserCommentsFilter(SimpleListFilter):
+    title = 'Show chats with new user comments'
+    parameter_name = 'chat'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('show', 'Show'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value():
+            return queryset.filter(~Q(comment__user__is_superuser=True) &
+                                   ~Q(comment__chat=None))
+        return queryset
+
+
 class ChatAdmin(admin.ModelAdmin):
     list_display = ['uuid', 'messages']
-    list_filter = ['user']
+    list_filter = ['user', DisableChatsWithoutCommentsFilter, ShowChatsWithNewUserCommentsFilter]
+    search_fields = ['user__username', 'uuid']
     readonly_fields = ('uuid', 'created_at', 'updated_at',)
 
     change_list_template = "admin/chat_changelist.html"

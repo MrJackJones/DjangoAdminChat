@@ -11,6 +11,11 @@ class ChatActions:
         pass
 
     def create(self, user: User = None) -> str or None:
+        """
+        Create chat
+        :param user: user: User or None
+        :return: uuid: str or None
+        """
         try:
             chat = Chat.objects.create(user=user)
             return chat.uuid
@@ -19,6 +24,11 @@ class ChatActions:
             return
 
     def get_chat_by_uuid(self, uuid: str) -> Chat or None:
+        """
+        Get chat by UUID
+        :param uuid: UUID: str
+        :return: Chat or None
+        """
         try:
             chat = Chat.objects.filter(uuid=uuid).first()
             return chat
@@ -27,6 +37,11 @@ class ChatActions:
             return
 
     def get_chat_by_user(self, user: User) -> [Chat] or None:
+        """
+        Get chat by User
+        :param user: user: User
+        :return: list[Chat] or None
+        """
         try:
             chats = Chat.objects.filter(user=user)
             if not chats:
@@ -38,6 +53,12 @@ class ChatActions:
             return
 
     def set_user_for_chat_by_uuid(self, uuid: str, user: User) -> Chat or None:
+        """
+        Set user for chat by UUID
+        :param uuid: UUID: str
+        :param user: user: User
+        :return: Chat or None
+        """
         try:
             chat = self.get_chat_by_uuid(uuid)
             if not chat:
@@ -51,6 +72,12 @@ class ChatActions:
             return
 
     def add_message(self, chat: Chat, message: str = '') -> ChatMessage or None:
+        """
+        Add message
+        :param chat: chat: Chat
+        :param message: message: str or ''
+        :return: ChatMessage or None
+        """
         try:
             comment = ChatMessage(
                 chat=chat,
@@ -65,6 +92,11 @@ class ChatActions:
             return
 
     def mark_is_read(self, chat: Chat) -> bool or None:
+        """
+        Mark chat is_read
+        :param chat: chat: Chat
+        :return: bool or None
+        """
         try:
             all_read_comments = chat.comment.filter(is_read=False)
             for comment in all_read_comments:
@@ -77,10 +109,16 @@ class ChatActions:
             return
 
     def get_comment_list(self, chat: Chat, message_max: int or bool = False) -> list or None:
+        """
+        Get comment list
+        :param chat: chat: Chat
+        :param message_max: message_max: int or bool = False
+        :return: list or None
+        """
         try:
             comments = []
 
-            all_comments = chat.comment.all().order_by('-id')
+            all_comments = chat.comment.all().order_by('id')
             if not all_comments:
                 comments = []
             else:

@@ -10,7 +10,7 @@ class Chat(models.Model):
     updated_at = models.DateTimeField(auto_now_add=False, auto_now=True)
 
     class Meta:
-        permissions = (("manage_support_tickets", "Can manage chats"),)
+        permissions = (("manage_chat", "Can manage chats"),)
         verbose_name = 'Chat'
         verbose_name_plural = 'Chat'
 
