@@ -1,12 +1,9 @@
 import json
-import logging
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
 from .main import ChatActions
-
-logger = logging.getLogger('main')
 
 
 @csrf_exempt
@@ -21,8 +18,7 @@ def chat(request):
         if message_max:
             message_max = int(message_max)
 
-    except Exception as e:
-        logger.error(e)
+    except Exception:
         return JsonResponse({
             'error': 'error_get_request',
         }, status=403)
@@ -32,8 +28,7 @@ def chat(request):
 
         try:
             chat = c.get_chat_by_uuid(uuid=uuid)
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return JsonResponse({
                 'error': 'chat_is_invalid',
             }, status=403)

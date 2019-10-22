@@ -1,9 +1,6 @@
-import logging
 from .models import Chat, ChatMessage
 from django.utils import timezone
 from django.contrib.auth.models import User
-
-logger = logging.getLogger('main')
 
 
 class ChatActions:
@@ -19,8 +16,7 @@ class ChatActions:
         try:
             chat = Chat.objects.create(user=user)
             return chat.uuid
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def get_chat_by_uuid(self, uuid: str) -> Chat or None:
@@ -32,8 +28,7 @@ class ChatActions:
         try:
             chat = Chat.objects.filter(uuid=uuid).first()
             return chat
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def get_chat_by_user(self, user: User) -> [Chat] or None:
@@ -48,8 +43,7 @@ class ChatActions:
                 return
 
             return chats
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def set_user_for_chat_by_uuid(self, uuid: str, user: User) -> Chat or None:
@@ -67,8 +61,7 @@ class ChatActions:
             chat.save()
 
             return chat
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def add_message(self, chat: Chat, user: User, message: str = '') -> ChatMessage or None:
@@ -88,8 +81,7 @@ class ChatActions:
             comment.save()
 
             return comment
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def mark_is_read(self, chat: Chat) -> bool or None:
@@ -105,8 +97,7 @@ class ChatActions:
                 comment.save()
 
             return True
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
 
     def get_comment_list(self, chat: Chat, message_max: int or bool = False) -> list or None:
@@ -145,6 +136,5 @@ class ChatActions:
                 comments = comments[:message_max]
 
             return comments
-        except Exception as e:
-            logger.error(e)
+        except Exception:
             return
