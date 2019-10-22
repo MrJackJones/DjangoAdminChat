@@ -10,7 +10,7 @@ class Chat(models.Model):
     updated_at = models.DateTimeField(auto_now_add=False, auto_now=True)
 
     class Meta:
-        permissions = (("manage_support_tickets", "Can manage support tickets"),)
+        permissions = (("manage_support_tickets", "Can manage chats"),)
         verbose_name = 'Chat'
         verbose_name_plural = 'Chat'
 
@@ -23,6 +23,5 @@ class ChatMessage(models.Model):
     user = models.ForeignKey(User, related_name='comment_author', null=True, blank=True, on_delete=models.CASCADE)
     message = models.TextField('Message', blank=False, null=False)
     is_read = models.BooleanField('is_read', default=False)
-    status = models.BooleanField('Status', default=False)
     created_at = models.DateTimeField(auto_now_add=True, auto_now=False)
     updated_at = models.DateTimeField(auto_now_add=False, auto_now=True)

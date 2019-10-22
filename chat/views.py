@@ -1,8 +1,12 @@
 import json
-from .models import Chat, ChatMessage
+import logging
 from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+from .main import ChatActions
+
+logger = logging.getLogger('main')
 
 
 def default(request):
@@ -17,21 +21,25 @@ def chat(request):
         data = json.loads(request.body.decode())
         uuid = data['uuid']
         message_max = data.get('max') or False
-        message = data.get('message') or False
+        message = data.get('message') or ''
         is_read = data.get('is_read') or False
 
         if message_max:
             message_max = int(message_max)
 
-    except:
+    except Exception as e:
+        logger.error(e)
         return JsonResponse({
             'error': 'error_get_request',
         }, status=403)
 
     if uuid:
+        c = ChatActions()
+
         try:
-            chat = Chat.objects.filter(uuid=uuid).first()
-        except:
+            chat = c.get_chat_by_uuid(uuid=uuid)
+        except Exception as e:
+            logger.error(e)
             return JsonResponse({
                 'error': 'chat_is_invalid',
             }, status=403)
@@ -42,14 +50,12 @@ def chat(request):
             }, status=403)
 
         if message:
-            comment = ChatMessage(
-                chat=chat,
-                user=chat.user,
-                message=message,
-            )
-            comment.save()
+            comment = c.add_message(chat, message)
 
-            comment.refresh_from_db()
+            if not comment:
+                return JsonResponse({
+                    'error': 'error_add_comment',
+                }, status=403)
 
             comment_data = {
                 'id': comment.pk,
@@ -61,33 +67,21 @@ def chat(request):
             }, status=200)
 
         if is_read:
-            all_read_comments = chat.comment.filter(is_read=False)
-            for comment in all_read_comments:
-                comment.is_read = True
-                comment.save()
+            if not c.mark_is_read(chat):
+                return JsonResponse({
+                    'error': 'error_mark_is_read',
+                }, status=403)
 
             return JsonResponse({
                 'data': True,
             }, status=200)
 
-        comments = []
+        comments = c.get_comment_list(chat, message_max)
 
-        all_comments = chat.comment.filter(status=False).all().order_by('-id')
-        if not all_comments:
-            comments = []
-        else:
-            for comment in all_comments:
-                comments.append({
-                    'id': comment.pk,
-                    'from': 'user' if not comment.user else 'support',
-                    'message': comment.message,
-                    'is_read': comment.is_read,
-                    'created_at': timezone.localtime(comment.created_at).strftime('%d/%m/%Y %H:%M'),
-                    'updated_at': timezone.localtime(comment.updated_at).strftime('%d/%m/%Y %H:%M'),
-                })
-
-        if message_max:
-            comments = comments[:message_max]
+        if not comments:
+            return JsonResponse({
+                'error': 'get_comment_list',
+            }, status=403)
 
         return JsonResponse({
             'data': comments,

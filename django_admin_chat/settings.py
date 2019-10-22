@@ -28,7 +28,65 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
-# Application definition
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(message)s',
+        },
+    },
+    'handlers': {
+        'main': {
+            'level': 'INFO',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'main.log'),
+        },
+        'views': {
+            'level': 'INFO',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'views.log'),
+        },
+        'utils': {
+            'level': 'INFO',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'utils.log'),
+        },
+        'info': {
+            'level': 'INFO',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'info.log'),
+        },
+        'error': {
+            'level': 'ERROR',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),
+        },
+        'critical': {
+            'level': 'CRITICAL',
+            'formatter': 'verbose',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'critical.log'),
+        },
+    },
+    'loggers': {
+        'main': {
+            'handlers': ['main'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'views': {
+            'handlers': ['views'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',

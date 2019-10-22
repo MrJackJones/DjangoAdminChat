@@ -4,14 +4,15 @@ from django.core.cache import cache
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User
 from django.http import HttpResponseRedirect
 
-from .models import Chat, ChatMessage
+from .main import ChatActions
+from .models import Chat
 
 
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ['uuid', 'last_comment']
+    list_display = ['uuid', 'messages']
     list_filter = ['user']
     readonly_fields = ('uuid', 'created_at', 'updated_at',)
 
@@ -37,9 +38,17 @@ class ChatAdmin(admin.ModelAdmin):
         return my_urls + urls
 
     def create_chat(self, request):
-        user = request.POST['get_user']
-        Chat.objects.create(user_id=user)
-        self.message_user(request, "All heroes are now immortal")
+        c = ChatActions()
+
+        user_id = request.POST['get_user']
+        user = None
+
+        if user_id:
+            user = User.objects.get(id=user_id)
+
+        chat_uuid = c.create(user)
+        self.message_user(request, "Chat created with UUID: {}".format(chat_uuid))
+
         return HttpResponseRedirect(".")
 
     @csrf_exempt
@@ -51,28 +60,16 @@ class ChatAdmin(admin.ModelAdmin):
                 'status': False,
             }, status=403)
 
-        if last_count_comment >= chat.comment.count():
+        count = chat.comment.count()
+
+        if last_count_comment >= count:
             return JsonResponse({
                 'status': False,
             }, status=200)
 
-        result = []
-
-        cache.set('id:{}'.format(pk), chat.comment.count(), 360)
-
-        for comment in chat.comment.all():
-            data = {}
-            if comment.user:
-                if comment.user.is_superuser:
-                    data['is_supper'] = True
-            else:
-                data['is_supper'] = False
-            data['message'] = comment.message
-            data['status'] = False
-            data['is_read'] = comment.is_read
-            data['created_at'] = comment.created_at.strftime("%D %H:%M:%S")
-            data['name'] = comment.user.username if comment.user else ''
-            result.append(data)
+        c = ChatActions()
+        result = c.get_comment_list(chat)
+        cache.set('id:{}'.format(pk), count, 360)
 
         return JsonResponse({
             'status': True,
@@ -81,10 +78,9 @@ class ChatAdmin(admin.ModelAdmin):
 
     @csrf_exempt
     def add_comment(self, request, pk):
-        msg = request.POST.get('message')
-        comment_id = request.POST.get('comment_id')
+        message = request.POST.get('message')
 
-        if not msg:
+        if not message:
             return JsonResponse({
                 'status': False,
                 'data': 'no_message',
@@ -97,39 +93,19 @@ class ChatAdmin(admin.ModelAdmin):
                 'data': 'no_ticket',
             }, status=403)
 
-        if comment_id:
-            comment = request.user.comment_author.filter(pk=comment_id).first()  # type: ChatMessage
-            if not comment:
-                return JsonResponse({
-                    'status': False,
-                }, status=403)
-
-            comment.message = msg
-
-            comment.save()
-
-            return JsonResponse({
-                'status': True,
-            }, status=200)
-
-        comment = ChatMessage(
-            user=request.user,
-            chat=chat,
-            message=msg,
-        )
-
-        comment.save()
+        c = ChatActions()
+        c.add_message(chat, message)
 
         return JsonResponse({
             'status': True,
         }, status=200)
 
-    def last_comment(self, obj):
+    def messages(self, obj):
         return render_to_string('admin/chat.html', context={
             'obj': obj,
         })
 
-    last_comment.short_description = 'Messages'
+    messages.short_description = 'Messages'
 
     class Media:
         css = {
@@ -143,6 +119,4 @@ class ChatAdmin(admin.ModelAdmin):
         return False
 
 
-admin.site.unregister(User)
-admin.site.unregister(Group)
 admin.site.register(Chat, ChatAdmin)
